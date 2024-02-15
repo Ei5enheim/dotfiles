@@ -1,4 +1,7 @@
+alias texit=detach_tmux_session
 
 gco() {
   _fzf_git_each_ref --no-multi | xargs git checkout
 }
+
+tab() { open -a "Google Chrome" $1; }
