@@ -3,18 +3,13 @@
 export PS1="%F{green} %~> %f"
 export PATH=$PATH:/opt/homebrew/bin
 
-curr_dir=${0:a:h}
+# The absolute, canonical ( no ".." ) path to this script
+curr_dir=$(cd -P -- "$(dirname -- "$0")" && echo "$(pwd -P)")
 
 source ${curr_dir}/tmux/tmux_utilities.sh
 primary_session_name="main"
 # start main tmux session
 start_tmux_session ${primary_session_name}
-
-# attach to tmux if not already. this is to avoid
-# infinte loops
-if [[ -z "${TMUX}" ]]; then
-  attach_to_tmux_session ${primary_session_name}
-fi
 
 fzf_dir="${curr_dir}/fzf"
 fzf_script="${fzf_dir}/fzf.zsh"
@@ -27,5 +22,10 @@ if [[ ! -e "${fzf_git_script}" ]]; then
 fi
 
 source "${fzf_git_script}"
-
 source "${curr_dir}/aliasrc"
+
+# attach to tmux if not already. this is to avoid
+# infinte loops
+if [[ -z "${TMUX}" ]]; then
+  attach_to_tmux_session ${primary_session_name}
+fi
