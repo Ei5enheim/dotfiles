@@ -1,0 +1,4 @@
+
+gco() {
+  _fzf_git_each_ref --no-multi | xargs git checkout
+}
