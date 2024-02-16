@@ -37,23 +37,25 @@ select_tmux_session() {
       options_assoc[$i]=$sessions[i]
   done
 
+  echo -n "options: n)new e)exit 0)main "
   session_name=""
   # Prompt the user to select an option
-  echo "enter 'n' to input new session name \nexit to exit" 
   select choice in "${options_assoc[@]}"; do
       # ensure option is not empty and REPLY is within bounds
-      if [[ -n $choice ]]; then
-        echo "You selected: $choice"
-        session_name=$choice
-        break
-      elif [[ $REPLY == "exit" ]]; then
-        exit 1
-      elif [[ $REPLY == "n" ]]; then
-        echo "creating a new session"
-        echo "enter session name:"
+      if [[ $REPLY == "n" ]]; then
+        echo -n "enter session name: "
         read session_name
         start_tmux_session $session_name
         break
+      elif [[ $REPLY == "0" ]]; then
+        session_name=$1
+        break
+      elif [[ -n $choice ]]; then
+        echo "You selected: $choice"
+        session_name=$choice
+        break
+      elif [[ $REPLY == "e" ]]; then
+        exit 1
       else
           echo "Invalid choice: ${REPLY}, value: ${choice}"
           exit 1
@@ -62,8 +64,9 @@ select_tmux_session() {
 
   # attaching to session
   tmux attach-session -t $session_name
+  tmux new-window
 }
 
 attach_to_tmux_session() {
-  select_tmux_session
+  select_tmux_session $1
 }
