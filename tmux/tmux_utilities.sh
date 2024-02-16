@@ -64,7 +64,7 @@ select_tmux_session() {
 
   # attaching to session
   tmux attach-session -t $session_name
-  tmux new-window
+  # tmux new-window
 }
 
 attach_to_tmux_session() {
