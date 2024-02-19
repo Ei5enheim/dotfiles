@@ -25,3 +25,7 @@ brew install bat
 
 # install delta
 brew install git-delta
+
+if [[ ! -e "${HOME}/.tmux.conf" ]]; then
+  ln "${curr_dir}/tmux/tmux/conf" ${HOME}/.tmux.conf
+fi
