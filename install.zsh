@@ -26,6 +26,10 @@ brew install bat
 # install delta
 brew install git-delta
 
-if [[ ! -e "${HOME}/.tmux.conf" ]]; then
+if [[ ! -e "${HOME}/.tmux.conf" ]]; thej
   ln "${curr_dir}/tmux/tmux/conf" ${HOME}/.tmux.conf
 fi
+
+# install TPM
+mkdir -p ${HOME}/.tmux/plugins/tpm
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
