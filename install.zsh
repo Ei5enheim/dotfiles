@@ -26,6 +26,10 @@ else
     echo "${tmux_file} does not exist"
 fi
 
+# install libtmux
+pip3 install --user libtmux
+
+python3 -m pip install dataclasses --user
 # install fd
 # alternative to fd which is faster.
 brew install fd

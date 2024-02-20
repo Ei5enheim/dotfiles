@@ -30,6 +30,8 @@ select_tmux_session() {
       sessions+=("$line")
   done <<< "$(tmux list-sessions | cut -d':' -f1 )"
 
+  echo "sessions are: ${sessions}"
+
   # Create an associative array to store indices and values
   # initialize associative array/map
   typeset -A options_assoc
@@ -62,6 +64,13 @@ select_tmux_session() {
       fi
   done
 
+
+  # Read lines into the array
+  while IFS= read -r line; do
+      sessions+=("$line")
+  done <<< "$(tmux list-sessions | cut -d':' -f1 )"
+
+  echo "sessions are: ${sessions}"
   # attaching to session
   tmux attach-session -t $session_name
   # tmux new-window
