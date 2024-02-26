@@ -14,6 +14,16 @@ brew install tmux
 # install fzf binary
 brew install fzf
 
+# install rg
+brew install ripgrep
+
+# rgall dependencies
+# https://github.com/phiresky/ripgrep-all
+brew install pandoc poppler ffmpeg
+
+# install rgall
+brew install rga
+
 fzf_version=$(fzf --version | cut -d' ' -f1)
 # enable auto-complete
 $(brew --prefix)/opt/fzf/install

@@ -1,3 +1,6 @@
+# tmux pop windown sizing options
+# -w 62% -h 38%
+
 # search history
 bindkey "^[[A" history-beginning-search-backward
 bindkey "^[[B" history-beginning-search-forward
@@ -22,4 +25,85 @@ function exit {
   else 
     builtin exit
   fi
+}
+
+# fda - including hidden directories
+fda() {
+  local dir
+  dir=$(find ${1:-.} -type d 2> /dev/null | fzf-tmux -p -w 90% -h 80% +m) && cd "$dir"
+}
+
+# usage
+# fif -g '!*.zsh' -g '!*.java' -a bat
+fif() {
+    # if [ ! "$#" -gt 0 ]; then echo "Need a string to search for!"; return 1; fi
+    # local file
+    # file="$(rga --max-count=1 --ignore-case --files-with-matches --no-messages "$*" | fzf-tmux -p +m -w 90% -h 80% --preview="rga --ignore-case --pretty --context 10 '"$*"' {}")" && echo "opening $file" && open "$file" || return 1;
+
+    #
+    # Interactive search.
+    # Usage: `ff` or `ff <folder>`.
+    #
+    # This flag adds a new glob for a particular file type. Only one glob can be added at a time. Multiple --type-add flags can be provided. Unless --type-clear is used, globs are added to any existing globs
+    # defined inside of ripgrep.
+    # Note that this must be passed to every invocation of ripgrep. Type settings are not persisted. See CONFIGURATION FILES for a workaround.
+    # Example:
+    #     rg --type-add 'foo:*.foo' -tfoo PATTERN
+    # This flag can also be used to include rules from other types with the special include directive. The include directive permits specifying one or more other type names (separated by a comma) that have been
+    # defined and its rules will automatically be imported into the type specified. For example, to create a type called src that matches C++, Python and Markdown files, one can use:
+    #     --type-add 'src:include:cpp,py,md'
+
+    local file_type_opts=""
+    local app="vim"
+    RG_DEFAULT_COMMAND="rg -i -l --hidden --no-ignore-vcs"
+
+    # parse -t, -T and --type-add options and append it to
+    # file_type_opts var
+    # while getopts ":t:T:type-add:" opt; do
+    while [[ $# -gt 0 ]]; do
+      # case $opt in
+      case $1 in
+        -g)
+          shift
+          file_type_opts+=" -g '"
+          file_type_opts+="$1"
+          file_type_opts+="'"
+          ;;
+        -a)
+          shift
+          app="$1"
+          ;;
+        *)
+          break
+          ;;
+      esac
+      shift
+    done
+
+    command="rg -l"
+    # append file type options to rg command.
+    if [[ -n "$file_type_opts" ]]; then
+      command+="$file_type_opts"
+    fi
+
+    # append -e to command so on reload string search works.
+    command+=" -e "
+    echo "$command"
+    # set the default search string to empty string.
+    default_rg_command="${command} ''"
+    selected=$(FZF_DEFAULT_COMMAND=${default_rg_command} fzf-tmux \
+      -p \
+      -w 90% \
+      -h 80% \
+      -m \
+      --ansi \
+      --disabled \
+      --bind "ctrl-a:select-all" \
+      --bind "f12:execute-silent:($app {})" \
+      --bind "change:reload:$command {q} || true" \
+      --preview "rg -i --pretty --context 2 {q} {}" | cut -d":" -f1,2
+    )
+
+    echo "selected files: $selected"
+    [[ -n $selected ]] && $app $selected # open multiple files in editor
 }
