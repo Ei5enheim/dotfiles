@@ -5,6 +5,37 @@
 bindkey "^[[A" history-beginning-search-backward
 bindkey "^[[B" history-beginning-search-forward
 
+# Ctrl-t to find a file/directory
+# Ctrl-r to find a command in history
+# Alt-C to cd into a selected directory
+
+# fzf settings
+export FZF_TMUX_OPTS='-p90%,80%'
+export FZF_DEFAULT_OPTS='--no-reverse --info=inline'
+
+# Use fd (https://github.com/sharkdp/fd) for listing path candidates.
+# - The first argument to the function ($1) is the base path to start traversal
+# - See the source code (completion.{bash,zsh}) for the details.
+_fzf_compgen_path() {
+  fd --hidden --follow --exclude ".git" . "$1"
+}
+
+# Use fd to generate the list for directory completion
+_fzf_compgen_dir() {
+  fd --type d --hidden --follow --exclude ".git" . "$1"
+}
+
+# Preview file content using bat (https://github.com/sharkdp/bat)
+export FZF_CTRL_T_OPTS="
+  --preview 'bat -n --color=always {}'
+  --bind 'ctrl-/:change-preview-window(down|hidden|)'"
+
+# CTRL-Y to copy the command into clipboard using pbcopy
+export FZF_CTRL_R_OPTS="
+  --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort'
+  --color header:italic
+  --header 'Press CTRL-Y to copy command into clipboard'"
+
 gco() {
   _fzf_git_each_ref --no-multi | xargs git checkout
 }
@@ -13,6 +44,8 @@ tab() { open -a "Google Chrome" $1; }
 
 tkill() { tmux kill-session -t $1; }
 
+# exit update to prevent killing of a session when there are less
+# than 1 window.
 function exit {
   if [[ -n "${TMUX}" ]]; then
     window_count=$(tmux list-windows | wc -l)
@@ -27,41 +60,24 @@ function exit {
   fi
 }
 
-# fda - including hidden directories
-fda() {
+# cda - including hidden directories
+cda() {
   local dir
-  dir=$(find ${1:-.} -type d 2> /dev/null | fzf-tmux -p -w 90% -h 80% +m) && cd "$dir"
+  dir=$(fd ${1:-.} --type d 2> /dev/null | fzf-tmux -p -w 90% -h 80% +m) && cd "$dir"
 }
 
 # usage
 # fif -g '!*.zsh' -g '!*.java' -a bat
+# find in files.
+# parse glob option
+# -g option to specify file filter
+# -a option to specify the app to open the file with
 fif() {
-    # if [ ! "$#" -gt 0 ]; then echo "Need a string to search for!"; return 1; fi
-    # local file
-    # file="$(rga --max-count=1 --ignore-case --files-with-matches --no-messages "$*" | fzf-tmux -p +m -w 90% -h 80% --preview="rga --ignore-case --pretty --context 10 '"$*"' {}")" && echo "opening $file" && open "$file" || return 1;
-
-    #
-    # Interactive search.
-    # Usage: `ff` or `ff <folder>`.
-    #
-    # This flag adds a new glob for a particular file type. Only one glob can be added at a time. Multiple --type-add flags can be provided. Unless --type-clear is used, globs are added to any existing globs
-    # defined inside of ripgrep.
-    # Note that this must be passed to every invocation of ripgrep. Type settings are not persisted. See CONFIGURATION FILES for a workaround.
-    # Example:
-    #     rg --type-add 'foo:*.foo' -tfoo PATTERN
-    # This flag can also be used to include rules from other types with the special include directive. The include directive permits specifying one or more other type names (separated by a comma) that have been
-    # defined and its rules will automatically be imported into the type specified. For example, to create a type called src that matches C++, Python and Markdown files, one can use:
-    #     --type-add 'src:include:cpp,py,md'
-
     local file_type_opts=""
     local app="vim"
     RG_DEFAULT_COMMAND="rg -i -l --hidden --no-ignore-vcs"
 
-    # parse -t, -T and --type-add options and append it to
-    # file_type_opts var
-    # while getopts ":t:T:type-add:" opt; do
     while [[ $# -gt 0 ]]; do
-      # case $opt in
       case $1 in
         -g)
           shift
@@ -88,7 +104,6 @@ fif() {
 
     # append -e to command so on reload string search works.
     command+=" -e "
-    echo "$command"
     # set the default search string to empty string.
     default_rg_command="${command} ''"
     selected=$(FZF_DEFAULT_COMMAND=${default_rg_command} fzf-tmux \
@@ -101,6 +116,10 @@ fif() {
       --bind "ctrl-a:select-all" \
       --bind "f12:execute-silent:($app {})" \
       --bind "change:reload:$command {q} || true" \
+      --bind "alt-j:preview-down" \
+      --bind "alt-k:preview-up" \
+      --bind "alt-g:preview-bottom" \
+      --bind "alt-t:preview-top" \
       --preview "rg -i --pretty --context 2 {q} {}" | cut -d":" -f1,2
     )
 
