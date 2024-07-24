@@ -1,5 +1,13 @@
 # tmux pop windown sizing options
 # -w 62% -h 38%
+#
+# open vim where you left off using marks and cursor position stored in Shared data (shada).
+# -c: This flag tells Neovim to execute the following command after opening.
+# "normal '0": This is the command to be executed.
+# In Neovim (and Vim), normal is used to execute normal mode commands as if you typed them in normal mode.
+# The command '0 refers to the mark 0, which usually denotes the position where you were last editing before you exited Neovim the last time.
+alias vim='nvim'
+alias vims='cd /Users/rajeshgopidi/.local/share/nvim/sessions/'
 
 # search history
 bindkey "^[[A" history-beginning-search-backward
@@ -126,3 +134,9 @@ fif() {
     echo "selected files: $selected"
     [[ -n $selected ]] && $app $selected # open multiple files in editor
 }
+
+# vim startup
+# create a session file if not existing already
+# session file has following components
+# 1. absolute dir
+# 2. git branch name, if valid

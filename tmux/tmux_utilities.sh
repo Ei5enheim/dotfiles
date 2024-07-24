@@ -39,7 +39,7 @@ select_tmux_session() {
       options_assoc[$i]=$sessions[i]
   done
 
-  echo -n "options: n)new e)exit 0)main "
+  echo -n "options: n)new e)exit "
   session_name=""
   # Prompt the user to select an option
   select choice in "${options_assoc[@]}"; do

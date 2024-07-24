@@ -21,9 +21,6 @@ brew install ripgrep
 # https://github.com/phiresky/ripgrep-all
 brew install pandoc poppler ffmpeg
 
-# install rgall
-brew install rga
-
 fzf_version=$(fzf --version | cut -d' ' -f1)
 # enable auto-complete
 $(brew --prefix)/opt/fzf/install
@@ -43,9 +40,6 @@ python3 -m pip install dataclasses --user
 # install fd
 # alternative to fd which is faster.
 brew install fd
-
-# install ripgrep
-brew install ripgrep
 
 # install bat for syntax highlighting.
 brew install bat
